@@ -1,0 +1,6 @@
+{
+  "name": "Lunch Puff Club",
+  "description": "Retro arcade runner based on Hugo Simpson's Pigeon-Rat experiment from The Simpsons: Treehouse of Horror VII, featuring fish heads, surgical stitches, Super Overdrive, and dynamic chiptune audio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

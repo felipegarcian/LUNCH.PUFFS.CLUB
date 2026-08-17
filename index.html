@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Lunch Puff Club: Turbo Overdrive</title>
+	<style>
+		@font-face {
+			font-family: 'VT323';
+			src: url('assets/fonts/VT323-Regular.ttf');
+		}
+
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-user-select: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: radial-gradient(circle at center, #1b2438 0%, #0a0d16 100%);
+			color: #e2e8f0;
+			font-family: 'VT323', monospace, sans-serif;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 12px;
+			overflow-x: hidden;
+		}
+
+		#preload-font {
+			font-family: 'VT323';
+			position: absolute;
+			left: -9999px;
+			font-size: 0;
+		}
+
+		/* Main Arcade Cabinet Housing */
+		.arcade-housing {
+			position: relative;
+			background: #111726;
+			border: 3px solid #3b4261;
+			border-radius: 12px;
+			box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 229, 255, 0.15);
+			padding: 14px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			max-width: 640px;
+			width: 100%;
+		}
+
+		/* Cabinet Marquee Header */
+		.marquee-header {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 6px 12px;
+			margin-bottom: 10px;
+			background: linear-gradient(90deg, #1f293d, #141b2b);
+			border: 1px solid #334155;
+			border-radius: 6px;
+		}
+
+		.marquee-title {
+			font-size: 22px;
+			letter-spacing: 1px;
+			color: #00e5ff;
+			text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+		}
+
+		.arcade-controls-bar {
+			display: flex;
+			gap: 8px;
+		}
+
+		.arcade-btn {
+			background: #1e293b;
+			color: #cbd5e1;
+			border: 1px solid #475569;
+			border-radius: 4px;
+			padding: 4px 10px;
+			font-family: 'VT323', monospace;
+			font-size: 16px;
+			cursor: pointer;
+			transition: all 0.15s ease;
+		}
+
+		.arcade-btn:hover {
+			background: #334155;
+			color: #38bdf8;
+			border-color: #38bdf8;
+		}
+
+		.arcade-btn:active {
+			transform: scale(0.95);
+		}
+
+		/* Game Screen Bezel */
+		.screen-bezel {
+			position: relative;
+			background: #000;
+			border: 4px solid #0f172a;
+			border-radius: 8px;
+			box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#game-container {
+			width: 600px;
+			height: 600px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#game-container canvas {
+			max-width: 100%;
+			height: auto !important;
+			display: block;
+			image-rendering: pixelated;
+		}
+
+		/* CRT Scanline Overlay Effect */
+		.crt-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			background: linear-gradient(
+				rgba(18, 16, 16, 0) 50%, 
+				rgba(0, 0, 0, 0.25) 50%
+			), linear-gradient(
+				90deg,
+				rgba(255, 0, 0, 0.03),
+				rgba(0, 255, 0, 0.01),
+				rgba(0, 0, 255, 0.03)
+			);
+			background-size: 100% 3px, 6px 100%;
+			opacity: 0.65;
+			z-index: 10;
+		}
+
+		.crt-overlay.disabled {
+			display: none;
+		}
+
+		/* Instructions Legend */
+		.cabinet-footer {
+			margin-top: 10px;
+			width: 100%;
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			background: #0f172a;
+			border: 1px solid #1e293b;
+			border-radius: 6px;
+			padding: 6px 10px;
+			font-size: 16px;
+			color: #94a3b8;
+			text-align: center;
+		}
+
+		.key-badge {
+			background: #1e293b;
+			color: #38bdf8;
+			border: 1px solid #475569;
+			border-radius: 3px;
+			padding: 1px 5px;
+			font-size: 14px;
+		}
+
+		/* Lore Modal Dialog */
+		.lore-modal-backdrop {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.82);
+			display: none;
+			justify-content: center;
+			align-items: center;
+			z-index: 999;
+			padding: 16px;
+		}
+
+		.lore-modal-backdrop.active {
+			display: flex;
+		}
+
+		.lore-modal-card {
+			background: #131a29;
+			border: 3px solid #f59e0b;
+			border-radius: 10px;
+			max-width: 580px;
+			width: 100%;
+			max-height: 90vh;
+			overflow-y: auto;
+			padding: 20px;
+			box-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
+			color: #f1f5f9;
+			font-family: 'VT323', monospace;
+		}
+
+		.lore-title {
+			font-size: 26px;
+			color: #f59e0b;
+			text-align: center;
+			border-bottom: 2px dashed #475569;
+			padding-bottom: 8px;
+			margin-bottom: 12px;
+		}
+
+		.lore-quote {
+			background: #1e293b;
+			border-left: 4px solid #f59e0b;
+			padding: 8px 12px;
+			font-size: 17px;
+			color: #fef08a;
+			margin-bottom: 14px;
+			border-radius: 0 6px 6px 0;
+		}
+
+		.lore-text {
+			font-size: 18px;
+			line-height: 1.4;
+			color: #cbd5e1;
+			margin-bottom: 14px;
+		}
+
+		.lore-items-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+			background: #0f172a;
+			padding: 10px;
+			border-radius: 6px;
+			border: 1px solid #334155;
+			margin-bottom: 16px;
+		}
+
+		.lore-item {
+			font-size: 16px;
+		}
+
+		.lore-item strong {
+			color: #38bdf8;
+		}
+
+		.lore-close-btn {
+			display: block;
+			width: 100%;
+			background: #f59e0b;
+			color: #000;
+			font-weight: bold;
+			font-size: 20px;
+			font-family: 'VT323', monospace;
+			border: none;
+			border-radius: 6px;
+			padding: 8px;
+			cursor: pointer;
+			transition: all 0.15s ease;
+		}
+
+		.lore-close-btn:hover {
+			background: #fbbf24;
+			transform: scale(1.02);
+		}
+
+		@media (max-width: 650px) {
+			.arcade-housing {
+				padding: 8px;
+				border-width: 2px;
+			}
+			.marquee-title {
+				font-size: 18px;
+			}
+			.cabinet-footer {
+				font-size: 14px;
+			}
+			.lore-items-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+
+	<!-- Phaser Engine -->
+	<script src="phaser.min.js"></script>
+
+	<!-- Game Core Modules -->
+	<script src="js/audio.js"></script>
+	<script src="js/gamestate.js"></script>
+	<script src="js/textures.js"></script>
+	<script src="js/hud.js"></script>
+
+	<!-- Phaser Game States -->
+	<script src="js/boot.js"></script>
+	<script src="js/load.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/rat.js"></script>
+	<script src="js/pigeon.js"></script>
+	<script src="js/end.js"></script>
+
+	<!-- Main Entrypoint -->
+	<script src="js/game.js"></script>
+</head>
+<body>
+	<span id="preload-font">LUNCH PUFF CLUB</span>
+
+	<div class="arcade-housing" id="arcadeHousing">
+		<header class="marquee-header" id="marqueeHeader">
+			<div class="marquee-title" id="marqueeTitle">⚡ THE PIGEON-RAT : TURBO OVERDRIVE ⚡</div>
+			<div class="arcade-controls-bar" id="arcadeControlsBar">
+				<button class="arcade-btn" id="btnToggleLore" title="Simpsons Attic Lore (L)">📖 LORE</button>
+				<button class="arcade-btn" id="btnToggleSound" title="Toggle Sound (M)">🔊 AUDIO</button>
+				<button class="arcade-btn" id="btnToggleCrt" title="Toggle Scanlines">📺 CRT FX</button>
+			</div>
+		</header>
+
+		<div class="screen-bezel" id="screenBezel">
+			<div class="crt-overlay" id="crtOverlay"></div>
+			<div id="game-container"></div>
+		</div>
+
+		<footer class="cabinet-footer" id="cabinetFooter">
+			<div><span class="key-badge">A</span><span class="key-badge">D</span> / <span class="key-badge">◄</span><span class="key-badge">►</span> Move</div>
+			<div><span class="key-badge">SPACE</span> / <span class="key-badge">▲</span> Flap</div>
+			<div><span class="key-badge">SPACE</span> / <span class="key-badge">SHIFT</span> Overdrive</div>
+			<div><span class="key-badge">L</span> Lore</div>
+		</footer>
+	</div>
+
+	<!-- Simpsons Pigeon-Rat Attic Lore Modal -->
+	<div class="lore-modal-backdrop" id="loreModalBackdrop">
+		<div class="lore-modal-card" id="loreModalCard">
+			<div class="lore-title">📜 HUGO'S ATTIC EXPERIMENT: THE PIGEON-RAT</div>
+			<div class="lore-quote">
+				"I made a pigeon-rat! ... It's practicing for when I sew myself back to Bart!"<br>
+				<span style="font-size: 15px; color: #94a3b8;">— Hugo Simpson, The Simpsons: Treehouse of Horror VII</span>
+			</div>
+			<div class="lore-text">
+				In <strong>"The Thing and I"</strong>, Bart discovers his evil conjoined twin, <strong>Hugo Simpson</strong>, locked away in the Simpson attic and sustained on buckets of fish heads fed to him by Homer.<br><br>
+				To practice surgical techniques before re-attaching himself to Bart, Hugo crafted the bizarre <strong>Pigeon-Rat</strong> by sewing the back of a pigeon to the back of a rat!<br><br>
+				Now, the unholy creation struggles through Springfield:
+				<ul style="margin-left: 20px; margin-top: 6px; margin-bottom: 6px;">
+					<li>When the <strong>Pigeon</strong> takes flight, it tries to escape out the broken attic window, but the heavy rat pulls it down!</li>
+					<li>When the <strong>Rat</strong> hits the ground, it tries to scurry into sewers and mouse holes, but the flapping pigeon wings get stuck!</li>
+				</ul>
+			</div>
+
+			<div class="lore-items-grid">
+				<div class="lore-item">🐟 <strong>Fish Heads:</strong> Hugo's attic feast! Instant 100% Super Overdrive + 1200 pts!</div>
+				<div class="lore-item">🪡 <strong>Surgical Needles:</strong> Hugo's stitches! Gives 3s Invulnerable Armor!</div>
+				<div class="lore-item">🧀 <strong>Cheese & 🍟 Fries:</strong> Snack combos that power the Turbo Boost gauge!</div>
+				<div class="lore-item">⚡ <strong>Super Overdrive:</strong> Press SPACE when full to smash cars & obstacles!</div>
+			</div>
+
+			<button class="lore-close-btn" id="btnCloseLore">✕ RETURN TO GAME</button>
+		</div>
+	</div>
+
+	<script>
+		// Cabinet button listeners
+		var loreModal = document.getElementById('loreModalBackdrop');
+		var btnToggleLore = document.getElementById('btnToggleLore');
+		var btnCloseLore = document.getElementById('btnCloseLore');
+
+		function toggleLoreModal() {
+			loreModal.classList.toggle('active');
+			SoundEngine.playMenuBeep();
+		}
+
+		btnToggleLore.addEventListener('click', toggleLoreModal);
+		btnCloseLore.addEventListener('click', toggleLoreModal);
+
+		loreModal.addEventListener('click', function(e) {
+			if (e.target === loreModal) {
+				toggleLoreModal();
+			}
+		});
+
+		window.addEventListener('keydown', function(e) {
+			if (e.key === 'l' || e.key === 'L') {
+				toggleLoreModal();
+			}
+		});
+
+		document.getElementById('btnToggleSound').addEventListener('click', function() {
+			var isMuted = SoundEngine.toggleMute();
+			this.textContent = isMuted ? '🔇 MUTED' : '🔊 AUDIO';
+		});
+
+		document.getElementById('btnToggleCrt').addEventListener('click', function() {
+			var overlay = document.getElementById('crtOverlay');
+			overlay.classList.toggle('disabled');
+			this.textContent = overlay.classList.contains('disabled') ? '📺 CRT OFF' : '📺 CRT ON';
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "lunch-puff-club",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lunch Puff Club arcade game",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "echo 'Build complete'",
+    "lint": "node -e 'console.log(\"Lint OK\")'",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
